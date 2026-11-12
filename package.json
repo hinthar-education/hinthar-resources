@@ -25,6 +25,7 @@
 		"node": ">=22"
 	},
 	"devDependencies": {
-		"vinxi": "^0.5.11"
+		"vinxi": "^0.5.11",
+		"wrangler": "^4.160.0"
 	}
 }
