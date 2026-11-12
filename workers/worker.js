@@ -13,29 +13,40 @@ export default {
     const url = new URL(request.url);
     url.hostname = "hinthar-resources.netlify.app";
 
-    const response = await fetch(new Request(url, request), {
+    // Clone headers and set Host header to Netlify's hostname
+    const headers = new Headers(request.headers);
+    headers.set("Host", "hinthar-resources.netlify.app");
+    headers.set("X-Forwarded-Host", "hinthar.education");
+
+    const response = await fetch(url.toString(), {
+      method: request.method,
+      headers: headers,
+      body: request.body,
       redirect: "manual"
     });
 
-    const headers = new Headers(response.headers);
-    const location = headers.get("location");
+    const responseHeaders = new Headers(response.headers);
+    const location = responseHeaders.get("location");
 
     if (location) {
       try {
-        const redirectURL = new URL(location);
-        if (redirectURL.hostname === "hinthar-resources.netlify.app") {
+        const redirectURL = new URL(location, "https://hinthar.education");
+        if (
+          redirectURL.hostname === "hinthar-resources.netlify.app" ||
+          redirectURL.hostname === "hinthar.education"
+        ) {
           redirectURL.hostname = "hinthar.education";
-          headers.set("location", redirectURL.toString());
+          responseHeaders.set("location", redirectURL.toString());
         }
       } catch {
-        // Leave relative redirects untouched
+        // Leave unparseable locations untouched
       }
     }
 
     return new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
-      headers
+      headers: responseHeaders
     });
   }
 };
