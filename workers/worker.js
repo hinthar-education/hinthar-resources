@@ -13,6 +13,18 @@ export default {
 	async fetch(request) {
 		const url = new URL(request.url);
 		url.hostname = "hinthar-resources.netlify.app";
-		return fetch(new Request(url, request));
+
+		const res = await fetch(new Request(url, request));
+
+		const location = res.headers.get("location");
+		if (location?.includes("hinthar-resources.netlify.app")) {
+			const headers = new Headers(res.headers);
+			headers.set(
+				"location",
+				location.replace("hinthar-resources.netlify.app", "hinthar.education")
+			);
+			return new Response(res.body, { status: res.status, headers });
+		}
+		return res;
 	}
 };
